@@ -49,6 +49,7 @@ New-AzVm `
     -VirtualNetworkName $virtualNetworkName `
     -SubnetName $subnetName `
     -PublicIpAddressName $publicIpAddressName `
+    -SecurityGroupName $networkSecurityGroupName `
     -OpenPorts 22,8080 `
     -SshKeyName $sshKeyName `
     -Credential $cred `
