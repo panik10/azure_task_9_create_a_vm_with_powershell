@@ -24,7 +24,6 @@ New-AzNetworkSecurityGroup -Name $networkSecurityGroupName -ResourceGroupName $r
 
 Write-Host "Creating a virtual network $virtualNetworkName ..."
 
-# New-AzVirtualNetwork -Name $virtualNetworkName -ResourceGroupName $resourceGroupName -Location $location -AddressPrefix $vnetAddressPrefix -SubnetName $subnetName -SubnetPrefix $subnetAddressPrefix
 
 $networkSecurityGroup = Get-AzNetworkSecurityGroup -Name $networkSecurityGroupName -ResourceGroupName $resourceGroupName
 $defaultSubnet       = New-AzVirtualNetworkSubnetConfig -Name $subnetName -AddressPrefix $subnetAddressPrefix -NetworkSecurityGroup $networkSecurityGroup
@@ -39,5 +38,21 @@ New-AzSshKey -ResourceGroupName $resourceGroupName -Name $sshKeyName -PublicKey 
 
 
 Write-Host "Creating a VM $vmName ..."
+$cred = Get-Credential
 
-New-AzVm -ResourceGroupName $resourceGroupName -Name $vmName -Location $location -image $vmImage -size $vmSize -PublicIpAddressName $publicIpAddressName -VirtualNetworkName $virtualNetworkName -SecurityGroupName $networkSecurityGroup -DomainNameLabel $dnsPrefix -SshKeyName $sshKeyName -Verbose
+New-AzVm `
+    -ResourceGroupName $resourceGroupName `
+    -Location $location `
+    -Name $vmName `
+    -image  $vmImage `
+    -Size $vmSize `
+    -VirtualNetworkName $virtualNetworkName `
+    -SubnetName $subnetName `
+    -PublicIpAddressName $publicIpAddressName `
+    -SecurityGroupName $networkSecurityGroupName `
+    -OpenPorts 22,8080 `
+    -SshKeyName $sshKeyName `
+    -Credential $cred `
+    -Verbose
+
+
