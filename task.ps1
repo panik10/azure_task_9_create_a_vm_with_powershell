@@ -24,10 +24,14 @@ New-AzNetworkSecurityGroup -Name $networkSecurityGroupName -ResourceGroupName $r
 
 Write-Host "Creating a virtual network $virtualNetworkName ..."
 
-New-AzVirtualNetwork -Name $virtualNetworkName -ResourceGroupName $resourceGroupName -Location $location -AddressPrefix $vnetAddressPrefix -SubnetName $subnetName -SubnetPrefix $subnetAddressPrefix
+# New-AzVirtualNetwork -Name $virtualNetworkName -ResourceGroupName $resourceGroupName -Location $location -AddressPrefix $vnetAddressPrefix -SubnetName $subnetName -SubnetPrefix $subnetAddressPrefix
+
+$networkSecurityGroup = Get-AzNetworkSecurityGroup -Name $networkSecurityGroupName -ResourceGroupName $resourceGroupName
+$defaultSubnet       = New-AzVirtualNetworkSubnetConfig -Name $subnetName -AddressPrefix $subnetAddressPrefix -NetworkSecurityGroup $networkSecurityGroup
+New-AzVirtualNetwork -Name $virtualNetworkName -ResourceGroupName $resourceGroupName -Location $location -AddressPrefix $vnetAddressPrefix -Subnet $defaultSubnet
 
 Write-Host "Creating a public IP $publicIpAddressName ..."
-$dnsPrefix = "mateazuretask923"
+$dnsPrefix = "mate-azure-task-9"
 New-AzPublicIpAddress -Name $publicIpAddressName -ResourceGroupName $resourceGroupName -Sku "Basic" -AllocationMethod Dynamic -DomainNameLabel $dnsPrefix -Location $location
 
 Write-Host "Creating a SSHkey service $sshKeyName ..."
@@ -36,4 +40,4 @@ New-AzSshKey -ResourceGroupName $resourceGroupName -Name $sshKeyName -PublicKey 
 
 Write-Host "Creating a VM $vmName ..."
 
-New-AzVm -ResourceGroupName $resourceGroupName -Name $vmName -Location $location -image $vmImage -size $vmSize -PublicIpAddressName $publicIpAddressName -DomainNameLabel $dnsPrefix -OpenPorts 80,22 -SshKeyName $sshKeyName -Verbose
+New-AzVm -ResourceGroupName $resourceGroupName -Name $vmName -Location $location -image $vmImage -size $vmSize -PublicIpAddressName $publicIpAddressName -VirtualNetworkName $virtualNetworkName -SecurityGroupName $networkSecurityGroup -DomainNameLabel $dnsPrefix -SshKeyName $sshKeyName -Verbose
